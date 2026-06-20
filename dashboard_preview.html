@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Renewable Energy KPI Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --border: #334155;
+    --text: #f1f5f9; --muted: #94a3b8;
+    --green: #22c55e; --amber: #f59e0b; --red: #ef4444; --blue: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  header h1 { font-size: 1.3rem; font-weight: 700; }
+  header span { font-size: 0.78rem; color: var(--muted); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+  .badge.green { background: #14532d; color: var(--green); }
+  .badge.red   { background: #450a0a; color: var(--red); }
+
+  /* KPI Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .kpi-card .label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .kpi-card .value { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+  .kpi-card .sub   { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+  .kpi-card .delta { font-size: 0.75rem; font-weight: 600; margin-top: 4px; }
+  .up   { color: var(--green); }
+  .down { color: var(--red); }
+  .warn { color: var(--amber); }
+
+  /* Chart area */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 22px; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .chart-card h2 { font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* Facility table */
+  .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 22px; }
+  .table-card h2 { font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; letter-spacing: .05em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; padding: 8px 10px; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 10px; border-bottom: 1px solid #1e293b; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #263148; }
+
+  /* Gauge row */
+  .gauge-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 10px; }
+  .gauge-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+  .gauge-card .fname { font-size: 0.7rem; color: var(--muted); margin-bottom: 8px; min-height: 28px; }
+  .gauge-card .score { font-size: 1.4rem; font-weight: 700; }
+
+  footer { font-size: 0.7rem; color: var(--muted); text-align: center; margin-top: 18px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚡ Renewable Energy KPI Dashboard</h1>
+    <span>Landfill Gas Operations · Jan 2023 – Dec 2024 · 5 Facilities</span>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:0.78rem;color:var(--muted)">Built with Python · DAX · Power BI</div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">github.com/srkbandi/renewable-energy-kpi-dashboard</div>
+  </div>
+</header>
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="label">Avg Methane Recovery</div>
+    <div class="value up">85.4<span style="font-size:1rem">%</span></div>
+    <div class="delta up">↑ +2.7pp vs Jan 2023</div>
+    <div class="sub">Target ≥ 80%</div>
+  </div>
+  <div class="kpi-card">
+    <div class="label">Total Gas Volume</div>
+    <div class="value" style="color:var(--blue)">881K<span style="font-size:1rem"> MMBtu</span></div>
+    <div class="delta up">↑ +4.2% YoY</div>
+    <div class="sub">Across all 5 facilities</div>
+  </div>
+  <div class="kpi-card">
+    <div class="label">CO₂ Avoided</div>
+    <div class="value up">5,012<span style="font-size:1rem"> t</span></div>
+    <div class="delta up">↑ +3.1% YoY</div>
+    <div class="sub">Tonnes CO₂ equivalent</div>
+  </div>
+  <div class="kpi-card">
+    <div class="label">Compliance Rate</div>
+    <div class="value warn">80<span style="font-size:1rem">%</span></div>
+    <div class="delta down">⚠ Riverside At Risk</div>
+    <div class="sub">4 of 5 facilities compliant</div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="charts-row">
+  <div class="chart-card">
+    <h2>Methane Recovery &amp; Uptime — 24-Month Trend</h2>
+    <canvas id="trendChart" height="110"></canvas>
+  </div>
+  <div class="chart-card">
+    <h2>Revenue by Facility (Total USD)</h2>
+    <canvas id="revChart" height="110"></canvas>
+  </div>
+</div>
+
+<!-- Facility Table -->
+<div class="table-card">
+  <h2>Facility Performance Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Facility</th>
+        <th>Methane Recovery %</th>
+        <th>Avg Uptime %</th>
+        <th>Gas Volume (MMBtu)</th>
+        <th>CO₂ Avoided (t)</th>
+        <th>Total Revenue</th>
+        <th>Efficiency Score</th>
+        <th>Compliance</th>
+      </tr>
+    </thead>
+    <tbody id="facilityTable"></tbody>
+  </table>
+</div>
+
+<!-- Efficiency Gauges -->
+<div class="table-card">
+  <h2>Efficiency Score by Facility</h2>
+  <div class="gauge-row" id="gauges"></div>
+</div>
+
+<footer>Renewable Energy KPI Dashboard · Shiva Ramakrishna Bandi · Data: Synthetic LFG Operations (2023–2024)</footer>
+
+<script>
+const TREND = [{"month":"2023-01-01","avg_methane_recovery":"84.03","avg_uptime":"92.5","total_gas_mmbtu":"36395.3","total_co2_avoided":"204.95","total_revenue_usd":"150820.86","month_label":"Jan 2023"},{"month":"2023-02-01","avg_methane_recovery":"84.67","avg_uptime":"92.83","total_gas_mmbtu":"37205.3","total_co2_avoided":"213.11","total_revenue_usd":"158231.53","month_label":"Feb 2023"},{"month":"2023-03-01","avg_methane_recovery":"84.5","avg_uptime":"92.68","total_gas_mmbtu":"36809.1","total_co2_avoided":"209.19","total_revenue_usd":"147417.47","month_label":"Mar 2023"},{"month":"2023-04-01","avg_methane_recovery":"84.38","avg_uptime":"92.55","total_gas_mmbtu":"36488.8","total_co2_avoided":"206.04","total_revenue_usd":"154532.84","month_label":"Apr 2023"},{"month":"2023-05-01","avg_methane_recovery":"84.48","avg_uptime":"92.56","total_gas_mmbtu":"36496.2","total_co2_avoided":"206.18","total_revenue_usd":"149005.38","month_label":"May 2023"},{"month":"2023-06-01","avg_methane_recovery":"84.76","avg_uptime":"92.67","total_gas_mmbtu":"36767.4","total_co2_avoided":"208.93","total_revenue_usd":"155221.81","month_label":"Jun 2023"},{"month":"2023-07-01","avg_methane_recovery":"84.59","avg_uptime":"92.52","total_gas_mmbtu":"36376.4","total_co2_avoided":"205.06","total_revenue_usd":"145013.63","month_label":"Jul 2023"},{"month":"2023-08-01","avg_methane_recovery":"84.84","avg_uptime":"92.61","total_gas_mmbtu":"36601.9","total_co2_avoided":"207.38","total_revenue_usd":"152503.01","month_label":"Aug 2023"},{"month":"2023-09-01","avg_methane_recovery":"84.87","avg_uptime":"92.57","total_gas_mmbtu":"36490.3","total_co2_avoided":"206.3","total_revenue_usd":"153953.86","month_label":"Sep 2023"},{"month":"2023-10-01","avg_methane_recovery":"85.2","avg_uptime":"92.72","total_gas_mmbtu":"36855.1","total_co2_avoided":"210.0","total_revenue_usd":"155270.3","month_label":"Oct 2023"},{"month":"2023-11-01","avg_methane_recovery":"85.29","avg_uptime":"92.71","total_gas_mmbtu":"36830.3","total_co2_avoided":"209.8","total_revenue_usd":"156872.56","month_label":"Nov 2023"},{"month":"2023-12-01","avg_methane_recovery":"85.12","avg_uptime":"92.56","total_gas_mmbtu":"36441.8","total_co2_avoided":"205.97","total_revenue_usd":"149430.8","month_label":"Dec 2023"},{"month":"2024-01-01","avg_methane_recovery":"85.18","avg_uptime":"92.54","total_gas_mmbtu":"36384.9","total_co2_avoided":"205.45","total_revenue_usd":"153113.7","month_label":"Jan 2024"},{"month":"2024-02-01","avg_methane_recovery":"85.53","avg_uptime":"92.69","total_gas_mmbtu":"36771.5","total_co2_avoided":"209.37","total_revenue_usd":"151086.82","month_label":"Feb 2024"},{"month":"2024-03-01","avg_methane_recovery":"85.52","avg_uptime":"92.63","total_gas_mmbtu":"36597.0","total_co2_avoided":"207.67","total_revenue_usd":"149806.84","month_label":"Mar 2024"},{"month":"2024-04-01","avg_methane_recovery":"85.79","avg_uptime":"92.74","total_gas_mmbtu":"36862.2","total_co2_avoided":"210.36","total_revenue_usd":"152987.31","month_label":"Apr 2024"},{"month":"2024-05-01","avg_methane_recovery":"85.96","avg_uptime":"92.79","total_gas_mmbtu":"36974.7","total_co2_avoided":"211.55","total_revenue_usd":"152019.4","month_label":"May 2024"},{"month":"2024-06-01","avg_methane_recovery":"85.91","avg_uptime":"92.7","total_gas_mmbtu":"36748.3","total_co2_avoided":"209.34","total_revenue_usd":"154402.34","month_label":"Jun 2024"},{"month":"2024-07-01","avg_methane_recovery":"86.21","avg_uptime":"92.82","total_gas_mmbtu":"37056.6","total_co2_avoided":"212.46","total_revenue_usd":"148836.86","month_label":"Jul 2024"},{"month":"2024-08-01","avg_methane_recovery":"86.2","avg_uptime":"92.76","total_gas_mmbtu":"36898.3","total_co2_avoided":"210.94","total_revenue_usd":"154478.41","month_label":"Aug 2024"},{"month":"2024-09-01","avg_methane_recovery":"86.33","avg_uptime":"92.78","total_gas_mmbtu":"36942.4","total_co2_avoided":"211.43","total_revenue_usd":"159109.74","month_label":"Sep 2024"},{"month":"2024-10-01","avg_methane_recovery":"86.3","avg_uptime":"92.71","total_gas_mmbtu":"36759.3","total_co2_avoided":"209.64","total_revenue_usd":"158101.97","month_label":"Oct 2024"},{"month":"2024-11-01","avg_methane_recovery":"86.31","avg_uptime":"92.67","total_gas_mmbtu":"36633.8","total_co2_avoided":"208.45","total_revenue_usd":"149717.94","month_label":"Nov 2024"},{"month":"2024-12-01","avg_methane_recovery":"86.71","avg_uptime":"92.85","total_gas_mmbtu":"37087.7","total_co2_avoided":"213.03","total_revenue_usd":"153841.94","month_label":"Dec 2024"}];
+
+const FAC = [{"facility":"Eastbrook Landfill","avg_methane_recovery":"87.67","avg_uptime":"88.21","total_gas_mmbtu":"157725.1","total_co2_avoided":"888.56","total_revenue_usd":"657058.71","avg_efficiency_score":"86.96","compliance_rate_pct":"100.0"},{"facility":"Northgate LFG Site","avg_methane_recovery":"82.47","avg_uptime":"96.59","total_gas_mmbtu":"183785.8","total_co2_avoided":"1153.27","total_revenue_usd":"752208.52","avg_efficiency_score":"86.59","compliance_rate_pct":"100.0"},{"facility":"Riverside Energy Plant","avg_methane_recovery":"76.97","avg_uptime":"91.02","total_gas_mmbtu":"143314.3","total_co2_avoided":"924.88","total_revenue_usd":"599047.25","avg_efficiency_score":"82.51","compliance_rate_pct":"0.0"},{"facility":"Southfield Gas Recovery","avg_methane_recovery":"86.92","avg_uptime":"95.9","total_gas_mmbtu":"192748.3","total_co2_avoided":"860.17","total_revenue_usd":"787835.67","avg_efficiency_score":"88.58","compliance_rate_pct":"100.0"},{"facility":"Westview Processing","avg_methane_recovery":"92.77","avg_uptime":"91.64","total_gas_mmbtu":"203901.1","total_co2_avoided":"1185.72","total_revenue_usd":"869627.17","avg_efficiency_score":"90.94","compliance_rate_pct":"100.0"}];
+
+// ── Trend Chart ─────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: TREND.map(d => d.month_label),
+    datasets: [
+      {
+        label: 'Methane Recovery %',
+        data: TREND.map(d => +d.avg_methane_recovery),
+        borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.08)',
+        borderWidth: 2, pointRadius: 2, tension: 0.4, fill: true, yAxisID: 'y'
+      },
+      {
+        label: 'Avg Uptime %',
+        data: TREND.map(d => +d.avg_uptime),
+        borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.06)',
+        borderWidth: 2, pointRadius: 2, tension: 0.4, fill: true, yAxisID: 'y'
+      }
+    ]
+  },
+  options: {
+    responsive: true, interaction: { mode: 'index' },
+    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+    scales: {
+      x: { ticks: { color: '#64748b', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: '#1e293b' } },
+      y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' }, min: 75, max: 100 }
+    }
+  }
+});
+
+// ── Revenue Bar ────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('revChart'), {
+  type: 'bar',
+  data: {
+    labels: FAC.map(d => d.facility.split(' ').slice(0,2).join(' ')),
+    datasets: [{
+      label: 'Total Revenue (USD)',
+      data: FAC.map(d => Math.round(+d.total_revenue_usd / 1000)),
+      backgroundColor: ['#22c55e','#38bdf8','#ef4444','#f59e0b','#a78bfa'],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#64748b', font: { size: 10 }, callback: v => '$' + v + 'K' }, grid: { color: '#1e293b' } },
+      y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } }
+    }
+  }
+});
+
+// ── Facility Table ─────────────────────────────────────────────────────────────
+const tbody = document.getElementById('facilityTable');
+FAC.forEach(f => {
+  const compliant = f.compliance_rate_pct === '100.0';
+  const methane   = +f.avg_methane_recovery;
+  const mColor    = methane >= 90 ? '#22c55e' : methane >= 80 ? '#f59e0b' : '#ef4444';
+  tbody.innerHTML += `
+    <tr>
+      <td style="font-weight:600">${f.facility}</td>
+      <td style="color:${mColor};font-weight:600">${methane.toFixed(1)}%</td>
+      <td>${(+f.avg_uptime).toFixed(1)}%</td>
+      <td>${(+f.total_gas_mmbtu/1000).toFixed(1)}K</td>
+      <td>${(+f.total_co2_avoided).toLocaleString()}</td>
+      <td>$${(+f.total_revenue_usd/1000).toFixed(1)}K</td>
+      <td style="font-weight:600">${f.avg_efficiency_score}</td>
+      <td><span class="badge ${compliant?'green':'red'}">${compliant?'Compliant':'At Risk'}</span></td>
+    </tr>`;
+});
+
+// ── Efficiency Gauges ──────────────────────────────────────────────────────────
+const gaugeEl = document.getElementById('gauges');
+FAC.forEach(f => {
+  const score = +f.avg_efficiency_score;
+  const color = score >= 90 ? '#22c55e' : score >= 85 ? '#f59e0b' : '#ef4444';
+  gaugeEl.innerHTML += `
+    <div class="gauge-card">
+      <div class="fname">${f.facility}</div>
+      <div class="score" style="color:${color}">${score.toFixed(1)}</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-top:4px">/ 100</div>
+    </div>`;
+});
+</script>
+</body>
+</html>
